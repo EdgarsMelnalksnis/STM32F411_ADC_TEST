@@ -27,8 +27,6 @@ void init_USART2(uint32_t);
 volatile uint16_t adc1DmaWMem[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0 }; //make new file for global variables
 uint16_t adc_data[ITERATIONS];
-uint32_t manualCopySpeed = 0;
-uint32_t loopCopySpeed = 0;
 volatile uint16_t Tim10_counter = 0;
 
 static inline uint16_t testSpeedManualCopy(void) {
