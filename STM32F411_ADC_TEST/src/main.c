@@ -37,6 +37,22 @@ void init_USART2(uint32_t);
 uint16_t adc1[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //make new file for global variables
 uint16_t adc_data[ITERATIONS];
 
+static inline void testSpeedManualCopy(void) {
+    for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
+	adc_data[i] = adc1[0];
+	adc_data[i + 1] = adc1[0];
+	adc_data[i + 2] = adc1[0];
+	adc_data[i + 3] = adc1[0];
+	adc_data[i + 4] = adc1[0];
+	adc_data[i + 5] = adc1[0];
+	adc_data[i + 6] = adc1[0];
+	adc_data[i + 7] = adc1[0];
+	adc_data[i + 8] = adc1[0];
+	adc_data[i + 9] = adc1[0];
+
+    }
+}
+
 int main(void) {
     init_RCC();
     init_Timer10();
@@ -58,20 +74,7 @@ int main(void) {
 	TIM_Cmd(TIM10, ENABLE);
 	TIM_SetCounter(TIM10, 0);
 
-	for (i = 0; i <= ITERATIONS - 10; i += 10) {
-
-	    adc_data[i] = adc1[0];
-	    adc_data[i + 1] = adc1[0];
-	    adc_data[i + 2] = adc1[0];
-	    adc_data[i + 3] = adc1[0];
-	    adc_data[i + 4] = adc1[0];
-	    adc_data[i + 5] = adc1[0];
-	    adc_data[i + 6] = adc1[0];
-	    adc_data[i + 7] = adc1[0];
-	    adc_data[i + 8] = adc1[0];
-	    adc_data[i + 9] = adc1[0];
-
-	}
+	testSpeedManualCopy();
 
 	Tim10_counter = TIM_GetCounter(TIM10);
 	TIM_Cmd(TIM10, DISABLE);
@@ -79,7 +82,7 @@ int main(void) {
 	for (i = 0; i < ITERATIONS; i++) {
 	    printf("%i %i\n", i, adc1[0]);
 	}
-	printf("Counter:%i \nIterations:%i\nCounter/Iterations=%i",
+	printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i",
 		Tim10_counter, i, Tim10_counter / i);
 
     }
