@@ -34,21 +34,21 @@ void init_DMA2(void);
 void init_ADC1(void);
 void init_USART2(uint32_t);
 
-uint16_t adc1[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //make new file for global variables
+uint16_t adc1DmaWMem[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //make new file for global variables
 uint16_t adc_data[ITERATIONS];
 
 static inline void testSpeedManualCopy(void) {
     for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
-	adc_data[i] = adc1[0];
-	adc_data[i + 1] = adc1[0];
-	adc_data[i + 2] = adc1[0];
-	adc_data[i + 3] = adc1[0];
-	adc_data[i + 4] = adc1[0];
-	adc_data[i + 5] = adc1[0];
-	adc_data[i + 6] = adc1[0];
-	adc_data[i + 7] = adc1[0];
-	adc_data[i + 8] = adc1[0];
-	adc_data[i + 9] = adc1[0];
+	adc_data[i] = adc1DmaWMem[0];
+	adc_data[i + 1] = adc1DmaWMem[0];
+	adc_data[i + 2] = adc1DmaWMem[0];
+	adc_data[i + 3] = adc1DmaWMem[0];
+	adc_data[i + 4] = adc1DmaWMem[0];
+	adc_data[i + 5] = adc1DmaWMem[0];
+	adc_data[i + 6] = adc1DmaWMem[0];
+	adc_data[i + 7] = adc1DmaWMem[0];
+	adc_data[i + 8] = adc1DmaWMem[0];
+	adc_data[i + 9] = adc1DmaWMem[0];
 
     }
 }
@@ -56,7 +56,7 @@ static inline void testSpeedManualCopy(void) {
 static inline void testSpeedLoopCopy(void) {
     for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
 	for(uint16_t j = i; j < i + 10; ++j) {
-	    adc_data[j] = adc1[0];
+	    adc_data[j] = adc1DmaWMem[0];
 	}
     }
 }
@@ -88,7 +88,7 @@ int main(void) {
 	TIM_Cmd(TIM10, DISABLE);
 
 	for (i = 0; i < ITERATIONS; i++) {
-	    printf("%i %i\n", i, adc1[0]);
+	    printf("%i %i\n", i, adc1DmaWMem[0]);
 	}
 	printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i",
 		Tim10_counter, i, Tim10_counter / i);
@@ -102,7 +102,7 @@ int main(void) {
 	TIM_Cmd(TIM10, DISABLE);
 
 	for (i = 0; i < ITERATIONS; i++) {
-	    printf("%i %i\n", i, adc1[0]);
+	    printf("%i %i\n", i, adc1DmaWMem[0]);
 	}
 	printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i",
 		Tim10_counter, i, Tim10_counter / i);
@@ -210,7 +210,7 @@ void init_ADC1(void) {
 void init_DMA2(void) {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
     (*((uint32_t *) (0x40026400u + 0x18u))) = (uint32_t) 0x4001204cu; //set ADC1_DR port address DMA_SxPAR
-    (*((uint32_t *) (0x40026400u + 0x1cu))) = (uint32_t) &adc1[0]; // SRAM adrese..vajag aspkatiities, vai stack kkur tur neparaskta
+    (*((uint32_t *) (0x40026400u + 0x1cu))) = (uint32_t) &adc1DmaWMem[0]; // SRAM adrese..vajag aspkatiities, vai stack kkur tur neparaskta
     (*((uint32_t *) (0x40026400u + 0x14u))) = ITERATIONS; //number of data to be transferred
     (*((uint32_t *) (0x40026400u + 0x10u))) |= (1 << 8 | 1 << 10 | 1 << 11
 	    | 1 << 13); //(1<<8|1<<10|1<<12|1<<14);//circular mode,memory pointer is incremented,32 bit peripheral and 32 bit memory
