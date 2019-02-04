@@ -34,7 +34,7 @@ void init_DMA2(void);
 void init_ADC1(void);
 void init_USART2(uint32_t);
 
-uint16_t adc1DmaWMem[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //make new file for global variables
+volatile uint16_t adc1DmaWMem[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //make new file for global variables
 uint16_t adc_data[ITERATIONS];
 
 static inline void testSpeedManualCopy(void) {
