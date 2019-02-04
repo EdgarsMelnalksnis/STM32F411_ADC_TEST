@@ -212,8 +212,7 @@ void init_DMA2(void) {
     DMA2_Stream0->PAR = (uint32_t)(&ADC1->DR);
     DMA2_Stream0->M0AR = (uint32_t) &adc1DmaWMem[0];
     DMA2_Stream0->NDTR = sizeof(adc1DmaWMem) / sizeof(adc1DmaWMem[0]);
-    DMA2_Stream0->CR |= (DMA_SxCR_CIRC | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0
-	    | DMA_SxCR_MSIZE_0); //(1<<8|1<<10|1<<12|1<<14);//circular mode,memory pointer is incremented,32 bit peripheral and 32 bit memory
+    DMA2_Stream0->CR |= (DMA_SxCR_CIRC | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0 | DMA_SxCR_MSIZE_0);
     DMA2_Stream0->CR |= DMA_SxCR_EN; //starts DMA
 // DMA_Cmd(DMA2_Channel1, ENABLE);
 }
