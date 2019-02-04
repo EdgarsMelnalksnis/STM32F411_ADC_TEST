@@ -209,7 +209,7 @@ void init_ADC1(void) {
 
 void init_DMA2(void) {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-    (*((uint32_t *) (DMA2_Stream0_BASE + 0x8u))) = (uint32_t)(ADC1_BASE + 0x4c); //set ADC1_DR port address DMA_SxPAR
+    DMA2_Stream0->PAR = (uint32_t)(ADC1_BASE + 0x4c); //set ADC1_DR port address DMA_SxPAR
     (*((uint32_t *) (DMA2_Stream0_BASE + 0xcu))) = (uint32_t) &adc1DmaWMem[0]; // SRAM adrese..vajag aspkatiities, vai stack kkur tur neparaskta
     (*((uint32_t *) (DMA2_Stream0_BASE + 0x4u))) = ITERATIONS; //number of data to be transferred
     (*((uint32_t *) (DMA2_Stream0_BASE + 0x0u))) |= (1 << 8 | 1 << 10 | 1 << 11
