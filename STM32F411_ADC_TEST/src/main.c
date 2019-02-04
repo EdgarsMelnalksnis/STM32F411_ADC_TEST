@@ -72,7 +72,7 @@ int main(void) {
     init_DMA2();
     init_USART2(115200);
 
-    (*((int *) (ADC1_BASE + 0x8u))) |= 1 << 30; //start ADC
+    ADC1->CR2 |= ADC_CR2_SWSTART;
 
     uint16_t i = 0;
     volatile uint16_t Tim10_counter = 0;
