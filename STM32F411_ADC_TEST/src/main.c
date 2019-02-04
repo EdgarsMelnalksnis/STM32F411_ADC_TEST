@@ -212,9 +212,9 @@ void init_DMA2(void) {
     DMA2_Stream0->PAR = (uint32_t)(ADC1_BASE + 0x4c); //set ADC1_DR port address DMA_SxPAR
     DMA2_Stream0->M0AR = (uint32_t) &adc1DmaWMem[0]; // SRAM adrese..vajag aspkatiities, vai stack kkur tur neparaskta
     DMA2_Stream0->NDTR = ITERATIONS; //number of data to be transferred
-    DMA2_Stream0->CR |= (1 << 8 | 1 << 10 | 1 << 11
-	    | 1 << 13); //(1<<8|1<<10|1<<12|1<<14);//circular mode,memory pointer is incremented,32 bit peripheral and 32 bit memory
-    DMA2_Stream0->CR |= 1 << 0; //starts DMA
+    DMA2_Stream0->CR |= (DMA_SxCR_CIRC | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0
+	    | DMA_SxCR_MSIZE_0); //(1<<8|1<<10|1<<12|1<<14);//circular mode,memory pointer is incremented,32 bit peripheral and 32 bit memory
+    DMA2_Stream0->CR |= DMA_SxCR_EN; //starts DMA
 // DMA_Cmd(DMA2_Channel1, ENABLE);
 }
 
