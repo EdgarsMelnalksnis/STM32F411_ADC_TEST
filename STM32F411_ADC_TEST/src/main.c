@@ -101,7 +101,8 @@ int main(void) {
 }
 
 void init_RCC(void) {
-	RCC_MCO1Config(RCC_MCO1Source_PLLCLK, RCC_MCO1Div_1);
+	RCC_MCO1Config(RCC_MCO1Source_PLLCLK,RCC_MCO1Div_1);
+	RCC_MCO2Config(RCC_MCO2Source_SYSCLK,RCC_MCO2Div_1);
 	RCC_PLLConfig(RCC_PLLSource_HSI, 8, 100, 2, 4);	//16Mhz/8 *100 /2
 	RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 	//RCC_PCLK2Config(RCC_HCLK_Div2);	//APB2 CLK / 2 (ADC_CLOCK)
@@ -141,14 +142,15 @@ void init_GPIOA(void) {
 
 	GPIO_Init(GPIOA, &GPIO_InitDef); //pin 0, 1, 2 analog
 
-	GPIO_PinAFConfig(GPIOA, GPIO_Pin_8, GPIO_AF_MCO);
+	//GPIO_PinAFConfig(GPIOA, GPIO_Pin_8, GPIO_AF_MCO);
 
-	GPIO_InitDef.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitDef.GPIO_Pin = GPIO_Pin_8 ;
+	GPIO_InitDef.GPIO_OType=GPIO_OType_PP;
 	GPIO_InitDef.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitDef.GPIO_Speed = GPIO_Speed_50MHz;
+	//GPIO_InitDef.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitDef);
 
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO);
+	//GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO);
 }
 
 void init_GPIOC(void) {
@@ -163,7 +165,11 @@ void init_GPIOC(void) {
 	GPIO_Init(GPIOB, &GPIO_InitDef);
 
 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
+	GPIO_InitDef.GPIO_Pin = GPIO_Pin_9 ;
+	GPIO_InitDef.GPIO_OType=GPIO_OType_PP;
+	GPIO_InitDef.GPIO_Mode = GPIO_Mode_AF;
+	//GPIO_InitDef.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOC, &GPIO_InitDef);
 }
 
 void init_Interrupts(void) {
