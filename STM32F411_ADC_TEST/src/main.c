@@ -53,6 +53,14 @@ static inline void testSpeedManualCopy(void) {
     }
 }
 
+static inline void testSpeedLoopCopy(void) {
+    for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
+	for(uint16_t j = i; j < i + 10; ++j) {
+	    adc_data[j] = adc1[0];
+	}
+    }
+}
+
 int main(void) {
     init_RCC();
     init_Timer10();
@@ -85,6 +93,19 @@ int main(void) {
 	printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i",
 		Tim10_counter, i, Tim10_counter / i);
 
+	TIM_Cmd(TIM10, ENABLE);
+	TIM_SetCounter(TIM10, 0);
+
+	testSpeedLoopCopy();
+
+	Tim10_counter = TIM_GetCounter(TIM10);
+	TIM_Cmd(TIM10, DISABLE);
+
+	for (i = 0; i < ITERATIONS; i++) {
+	    printf("%i %i\n", i, adc1[0]);
+	}
+	printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i",
+		Tim10_counter, i, Tim10_counter / i);
     }
 }
 
