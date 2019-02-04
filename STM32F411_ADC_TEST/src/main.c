@@ -1,13 +1,3 @@
-/**
- ******************************************************************************
- * @file    main.c
- * @author  Ac6
- * @version V1.0
- * @date    01-December-2013
- * @brief   Default main function.
- ******************************************************************************
- */
-
 #include <stdint.h>
 #include <stdio.h>
 #include "stm32f4xx.h"
@@ -34,8 +24,46 @@ void init_DMA2(void);
 void init_ADC1(void);
 void init_USART2(uint32_t);
 
-uint16_t adc1[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //make new file for global variables
+volatile uint16_t adc1DmaWMem[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0 }; //make new file for global variables
 uint16_t adc_data[ITERATIONS];
+uint32_t manualCopySpeed = 0;
+uint32_t loopCopySpeed = 0;
+volatile uint16_t Tim10_counter = 0;
+
+static inline uint16_t testSpeedManualCopy(void) {
+	TIM_Cmd(TIM10, ENABLE);
+	TIM_SetCounter(TIM10, 0);
+	for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
+		adc_data[i] = adc1DmaWMem[0];
+		adc_data[i + 1] = adc1DmaWMem[0];
+		adc_data[i + 2] = adc1DmaWMem[0];
+		adc_data[i + 3] = adc1DmaWMem[0];
+		adc_data[i + 4] = adc1DmaWMem[0];
+		adc_data[i + 5] = adc1DmaWMem[0];
+		adc_data[i + 6] = adc1DmaWMem[0];
+		adc_data[i + 7] = adc1DmaWMem[0];
+		adc_data[i + 8] = adc1DmaWMem[0];
+		adc_data[i + 9] = adc1DmaWMem[0];
+
+	}
+	Tim10_counter = TIM_GetCounter(TIM10);
+	TIM_Cmd(TIM10, DISABLE);
+	return Tim10_counter / ITERATIONS;
+}
+
+static inline uint16_t testSpeedLoopCopy(void) {
+	TIM_Cmd(TIM10, ENABLE);
+	TIM_SetCounter(TIM10, 0);
+	for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
+		for (uint16_t j = i; j < i + 10; ++j) {
+			adc_data[j] = adc1DmaWMem[0];
+		}
+	}
+	Tim10_counter = TIM_GetCounter(TIM10);
+	TIM_Cmd(TIM10, DISABLE);
+	return Tim10_counter / ITERATIONS;
+}
 
 int main(void) {
 	init_RCC();
@@ -48,40 +76,28 @@ int main(void) {
 	init_DMA2();
 	init_USART2(115200);
 
-	(*((int *) (0x40012000u + 0x8u))) |= 1 << 30; //start ADC
+	ADC1->CR2 |= ADC_CR2_SWSTART;
 
 	uint16_t i = 0;
-	volatile uint16_t Tim10_counter = 0;
+
+	printf("SpeedLoopCopy:%i\n", testSpeedLoopCopy());
+	printf("SpeedManualCopy:%i\n", testSpeedManualCopy());
+	while (1)
+		;
 
 	while (1) {
 
-		TIM_Cmd(TIM10, ENABLE);
-		TIM_SetCounter(TIM10, 0);
-
-		for (i = 0; i <= ITERATIONS - 10; i += 10) {
-
-			adc_data[i] = adc1[0];
-			adc_data[i + 1] = adc1[0];
-			adc_data[i + 2] = adc1[0];
-			adc_data[i + 3] = adc1[0];
-			adc_data[i + 4] = adc1[0];
-			adc_data[i + 5] = adc1[0];
-			adc_data[i + 6] = adc1[0];
-			adc_data[i + 7] = adc1[0];
-			adc_data[i + 8] = adc1[0];
-			adc_data[i + 9] = adc1[0];
-
-		}
-
-		Tim10_counter = TIM_GetCounter(TIM10);
-		TIM_Cmd(TIM10, DISABLE);
-
 		for (i = 0; i < ITERATIONS; i++) {
-			printf("%i %i\n", i, adc1[0]);
+			printf("%i %i\n", i, adc1DmaWMem[0]);
 		}
-		printf("Counter:%i \nIterations:%i\nCounter/Iterations=%i",
+		printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i",
 				Tim10_counter, i, Tim10_counter / i);
 
+		for (i = 0; i < ITERATIONS; i++) {
+			printf("%i %i\n", i, adc1DmaWMem[0]);
+		}
+		printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i",
+				Tim10_counter, i, Tim10_counter / i);
 	}
 }
 
@@ -185,14 +201,15 @@ void init_ADC1(void) {
 
 void init_DMA2(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-	(*((uint32_t *) (0x40026400u + 0x18u))) = (uint32_t) 0x4001204cu; //set ADC1_DR port address DMA_SxPAR
-	(*((uint32_t *) (0x40026400u + 0x1cu))) = (uint32_t) &adc1[0]; // SRAM adrese..vajag aspkatiities, vai stack kkur tur neparaskta
-	(*((uint32_t *) (0x40026400u + 0x14u))) = ITERATIONS; //number of data to be transferred
-	(*((uint32_t *) (0x40026400u + 0x10u))) |= (1 << 8 | 1 << 10 | 1 << 11
-			| 1 << 13); //(1<<8|1<<10|1<<12|1<<14);//circular mode,memory pointer is incremented,32 bit peripheral and 32 bit memory
-	(*((uint32_t *) (0x40026400u + 0x10u))) |= 1 << 0; //starts DMA
+	DMA2_Stream0->PAR = (uint32_t) (&ADC1->DR);
+	DMA2_Stream0->M0AR = (uint32_t) &adc1DmaWMem[0];
+	DMA2_Stream0->NDTR = sizeof(adc1DmaWMem) / sizeof(adc1DmaWMem[0]);
+	DMA2_Stream0->CR = (DMA_SxCR_CIRC | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0
+			| DMA_SxCR_MSIZE_0);
+	DMA2_Stream0->CR |= DMA_SxCR_EN; //starts DMA
 // DMA_Cmd(DMA2_Channel1, ENABLE);
 }
+
 void init_USART2(uint32_t baudrate) {
 
 	GPIO_InitTypeDef GPIO_InitStruct; // this is for the GPIO pins used as TX and RX
