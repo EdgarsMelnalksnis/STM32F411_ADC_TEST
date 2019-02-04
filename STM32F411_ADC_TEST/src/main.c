@@ -64,7 +64,7 @@ static inline uint16_t testSpeedLoopCopy(void) {
 }
 
 int main(void) {
-
+	uint16_t loopCopyPerformance = 0, ManualCopyPerformance = 0;
 	init_RCC();
 	init_Timer10();
 	init_GPIOB();
@@ -79,24 +79,24 @@ int main(void) {
 
 	uint16_t i = 0;
 
-	printf("SpeedLoopCopy:%i\n", testSpeedLoopCopy());
-	printf("SpeedManualCopy:%i\n", testSpeedManualCopy());
-	while (1)
-		;
+	//printf("SpeedLoopCopy:%i\n", testSpeedLoopCopy());
+	//printf("SpeedManualCopy:%i\n", testSpeedManualCopy());
 
 	while (1) {
+		ManualCopyPerformance = testSpeedManualCopy();
+		for (i = 0; i < ITERATIONS; i++) {
+			printf("%i %i\n", i, adc1DmaWMem[0]);
+		}
+		printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i\n",
+				Tim10_counter, i, ManualCopyPerformance);
+
+		loopCopyPerformance = testSpeedLoopCopy();
 
 		for (i = 0; i < ITERATIONS; i++) {
 			printf("%i %i\n", i, adc1DmaWMem[0]);
 		}
-		printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i",
-				Tim10_counter, i, Tim10_counter / i);
-
-		for (i = 0; i < ITERATIONS; i++) {
-			printf("%i %i\n", i, adc1DmaWMem[0]);
-		}
-		printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i",
-				Tim10_counter, i, Tim10_counter / i);
+		printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i\n",
+				Tim10_counter, i, loopCopyPerformance);
 	}
 }
 
