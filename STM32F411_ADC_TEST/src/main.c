@@ -214,7 +214,7 @@ void init_DMA2(void) {
     DMA2_Stream0->NDTR = ITERATIONS; //number of data to be transferred
     DMA2_Stream0->CR |= (1 << 8 | 1 << 10 | 1 << 11
 	    | 1 << 13); //(1<<8|1<<10|1<<12|1<<14);//circular mode,memory pointer is incremented,32 bit peripheral and 32 bit memory
-    (*((uint32_t *) (DMA2_Stream0_BASE + 0x0u))) |= 1 << 0; //starts DMA
+    DMA2_Stream0->CR |= 1 << 0; //starts DMA
 // DMA_Cmd(DMA2_Channel1, ENABLE);
 }
 
