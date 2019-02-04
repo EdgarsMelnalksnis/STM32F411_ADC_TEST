@@ -64,6 +64,7 @@ static inline uint16_t testSpeedLoopCopy(void) {
 }
 
 int main(void) {
+
 	init_RCC();
 	init_Timer10();
 	init_GPIOB();
