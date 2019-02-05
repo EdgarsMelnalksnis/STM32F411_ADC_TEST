@@ -24,25 +24,34 @@ void init_DMA2(void);
 void init_ADC1(void);
 void init_USART2(uint32_t);
 
-volatile uint16_t adc1DmaWMem[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0 }; //make new file for global variables
-uint16_t adc_data[ITERATIONS];
+volatile uint16_t adc1DmaWMem[16];
+uint16_t adcCh1Data[ITERATIONS], adcCh2Data[ITERATIONS], adcCh3Data[ITERATIONS], adcCh4Data[ITERATIONS];
 volatile uint16_t Tim10_counter = 0;
 
 static inline uint16_t testSpeedManualCopy(void) {
 	TIM_Cmd(TIM10, ENABLE);
 	TIM_SetCounter(TIM10, 0);
 	for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
-		adc_data[i] = adc1DmaWMem[0];
-		adc_data[i + 1] = adc1DmaWMem[0];
-		adc_data[i + 2] = adc1DmaWMem[0];
-		adc_data[i + 3] = adc1DmaWMem[0];
-		adc_data[i + 4] = adc1DmaWMem[0];
-		adc_data[i + 5] = adc1DmaWMem[0];
-		adc_data[i + 6] = adc1DmaWMem[0];
-		adc_data[i + 7] = adc1DmaWMem[0];
-		adc_data[i + 8] = adc1DmaWMem[0];
-		adc_data[i + 9] = adc1DmaWMem[0];
+		adcCh1Data[i] = adc1DmaWMem[0];
+		adcCh2Data[i] = adc1DmaWMem[1];
+		adcCh1Data[i + 1] = adc1DmaWMem[0];
+		adcCh2Data[i + 1] = adc1DmaWMem[1];
+		adcCh1Data[i + 2] = adc1DmaWMem[0];
+		adcCh2Data[i + 2] = adc1DmaWMem[1];
+		adcCh1Data[i + 3] = adc1DmaWMem[0];
+		adcCh2Data[i + 3] = adc1DmaWMem[1];
+		adcCh1Data[i + 4] = adc1DmaWMem[0];
+		adcCh2Data[i + 4] = adc1DmaWMem[1];
+		adcCh1Data[i + 5] = adc1DmaWMem[0];
+		adcCh2Data[i + 5] = adc1DmaWMem[1];
+		adcCh1Data[i + 6] = adc1DmaWMem[0];
+		adcCh2Data[i + 6] = adc1DmaWMem[1];
+		adcCh1Data[i + 7] = adc1DmaWMem[0];
+		adcCh2Data[i + 7] = adc1DmaWMem[1];
+		adcCh1Data[i + 8] = adc1DmaWMem[0];
+		adcCh2Data[i + 8] = adc1DmaWMem[1];
+		adcCh1Data[i + 9] = adc1DmaWMem[0];
+		adcCh2Data[i + 9] = adc1DmaWMem[1];
 
 	}
 	Tim10_counter = TIM_GetCounter(TIM10);
@@ -55,7 +64,10 @@ static inline uint16_t testSpeedLoopCopy(void) {
 	TIM_SetCounter(TIM10, 0);
 	for (uint16_t i = 0; i <= ITERATIONS - 10; i += 10) {
 		for (uint16_t j = i; j < i + 10; ++j) {
-			adc_data[j] = adc1DmaWMem[0];
+			adcCh1Data[j] = adc1DmaWMem[0];
+			adcCh2Data[j] = adc1DmaWMem[1];
+			adcCh3Data[j] = adc1DmaWMem[2];
+			adcCh4Data[j] = adc1DmaWMem[3];
 		}
 	}
 	Tim10_counter = TIM_GetCounter(TIM10);
@@ -78,31 +90,34 @@ int main(void) {
 	ADC1->CR2 |= ADC_CR2_SWSTART;
 
 	uint16_t i = 0;
-
+	//printf("Iterations: %i\n",ITERATIONS);
 	//printf("SpeedLoopCopy:%i\n", testSpeedLoopCopy());
 	//printf("SpeedManualCopy:%i\n", testSpeedManualCopy());
 
 	while (1) {
+		/*
 		ManualCopyPerformance = testSpeedManualCopy();
 		for (i = 0; i < ITERATIONS; i++) {
-			printf("%i %i\n", i, adc1DmaWMem[0]);
+			printf("%i %i\n", adcCh1Data[i], adcCh2Data[i]);
 		}
-		printf("Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i\n",
+		printf(
+				"Manual copy: Counter:%i \nIterations:%i\nCounter/Iterations=%i\n",
 				Tim10_counter, i, ManualCopyPerformance);
+		 */
+		 loopCopyPerformance = testSpeedLoopCopy();
 
-		loopCopyPerformance = testSpeedLoopCopy();
+		 for (i = 0; i < ITERATIONS; i++) {
+		 printf("%i %i %i %i\n", adcCh1Data[i], adcCh2Data[i],adcCh3Data[i], adcCh4Data[i]);
+		 }
+		 printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i\n",
+		 Tim10_counter, i, loopCopyPerformance);
 
-		for (i = 0; i < ITERATIONS; i++) {
-			printf("%i %i\n", i, adc1DmaWMem[0]);
-		}
-		printf("Loop  copy:  Counter:%i \nIterations:%i\nCounter/Iterations=%i\n",
-				Tim10_counter, i, loopCopyPerformance);
 	}
 }
 
 void init_RCC(void) {
-	RCC_MCO1Config(RCC_MCO1Source_PLLCLK,RCC_MCO1Div_1);
-	RCC_MCO2Config(RCC_MCO2Source_SYSCLK,RCC_MCO2Div_1);
+	RCC_MCO1Config(RCC_MCO1Source_PLLCLK, RCC_MCO1Div_1);
+	RCC_MCO2Config(RCC_MCO2Source_SYSCLK, RCC_MCO2Div_1);
 	RCC_PLLConfig(RCC_PLLSource_HSI, 8, 100, 2, 4);	//16Mhz/8 *100 /2
 	RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 	//RCC_PCLK2Config(RCC_HCLK_Div2);	//APB2 CLK / 2 (ADC_CLOCK)
@@ -144,8 +159,8 @@ void init_GPIOA(void) {
 
 	//GPIO_PinAFConfig(GPIOA, GPIO_Pin_8, GPIO_AF_MCO);
 
-	GPIO_InitDef.GPIO_Pin = GPIO_Pin_8 ;
-	GPIO_InitDef.GPIO_OType=GPIO_OType_PP;
+	GPIO_InitDef.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitDef.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitDef.GPIO_Mode = GPIO_Mode_AF;
 	//GPIO_InitDef.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitDef);
@@ -165,8 +180,8 @@ void init_GPIOC(void) {
 	GPIO_Init(GPIOB, &GPIO_InitDef);
 
 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-	GPIO_InitDef.GPIO_Pin = GPIO_Pin_9 ;
-	GPIO_InitDef.GPIO_OType=GPIO_OType_PP;
+	GPIO_InitDef.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitDef.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitDef.GPIO_Mode = GPIO_Mode_AF;
 	//GPIO_InitDef.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOC, &GPIO_InitDef);
@@ -193,11 +208,13 @@ void init_ADC1(void) {
 //  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
 	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_NbrOfConversion = 1;
+	ADC_InitStructure.ADC_NbrOfConversion = 4;
 	ADC_Init(ADC1, &ADC_InitStructure);
 
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_3Cycles);
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_3Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 3, ADC_SampleTime_3Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 4, ADC_SampleTime_3Cycles);
 
 	ADC_Cmd(ADC1, ENABLE);  //enable ADC1
 	ADC_DMACmd(ADC1, ENABLE); //enable DMA for ADC
@@ -208,7 +225,7 @@ void init_DMA2(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 	DMA2_Stream0->PAR = (uint32_t) (&ADC1->DR);
 	DMA2_Stream0->M0AR = (uint32_t) &adc1DmaWMem[0];
-	DMA2_Stream0->NDTR = sizeof(adc1DmaWMem) / sizeof(adc1DmaWMem[0]);
+	DMA2_Stream0->NDTR = 4; // sizeof(adc1DmaWMem) / sizeof(adc1DmaWMem[0]);
 	DMA2_Stream0->CR = (DMA_SxCR_CIRC | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0
 			| DMA_SxCR_MSIZE_0);
 	DMA2_Stream0->CR |= DMA_SxCR_EN; //starts DMA
